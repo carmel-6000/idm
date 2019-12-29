@@ -1,0 +1,48 @@
+{
+  "_from": "git+https://edstartdev@bitbucket.org/ed-start/idm-openid-nodejs.git",
+  "_id": "idm-openid@1.1.0",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/idm-openid",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "idm-openid@git+https://edstartdev@bitbucket.org/ed-start/idm-openid-nodejs.git",
+    "name": "idm-openid",
+    "escapedName": "idm-openid",
+    "rawSpec": "git+https://edstartdev@bitbucket.org/ed-start/idm-openid-nodejs.git",
+    "saveSpec": "git+https://edstartdev@bitbucket.org/ed-start/idm-openid-nodejs.git",
+    "fetchSpec": "https://edstartdev@bitbucket.org/ed-start/idm-openid-nodejs.git",
+    "gitCommittish": null
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git+https://edstartdev@bitbucket.org/ed-start/idm-openid-nodejs.git#1478e97536d6100b64b51d9ba5413f021e27ba8c",
+  "_spec": "idm-openid@git+https://edstartdev@bitbucket.org/ed-start/idm-openid-nodejs.git",
+  "_where": "C:\\Projects\\jumpstart\\jumpstart-server",
+  "author": {
+    "name": "Edstart"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "app-root-path": "^2.1.0",
+    "mkdirp": "^0.5.1",
+    "openid-client": "^2.4.3"
+  },
+  "deprecated": false,
+  "description": "connect to idm with openid",
+  "homepage": "https://bitbucket.org/ed-start/idm-openid-nodejs#readme",
+  "license": "UNLICENSED",
+  "main": "index.js",
+  "name": "idm-openid",
+  "repository": {
+    "type": "git",
+    "url": "git+https://HarelHe@bitbucket.org/ed-start/idm-openid-nodejs.git"
+  },
+  "scripts": {
+    "install": "node install.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.1.0"
+}

@@ -1,0 +1,8 @@
+{
+  "client_id": "2d938a37-0fe3-46c8-a619-e4cb8284ab4d",
+  "client_secret" : "QNNZIDTQ3ROT_CyXkaLbgQI9wV-d17G6WTZeL86T7sGrWCC8fseaRAkXp3Yzx3vmX3_H0WmPBCYiR1z-YzLCRA",
+  "redirect_uri": "http://localhost:8080/idmcallback",
+  "authorization_scope": "openid profile eduorg edustudent",
+  "id_token_signed_response_alg" : "none"
+}
+  

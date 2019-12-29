@@ -1,0 +1,47 @@
+/*
+How to implement IDM module into your server:
+
+1. 
+install these additional packages:
+    npm i app-root-path --save
+    npm i node-jose --save
+    npm i p-any --save 
+    npm i oidc-token-hash --save 
+
+2. cp APP/server/modules/idm/samples/idm-router.js APP/server/routes
+
+3. Add these lines to this file /server/routes/index.js:
+
+const idmRouter=require('./idm-router');
+
+module.exports = function (app) {
+    
+    app.use(idmRouter);
+    ....
+}
+
+4. Edit APP/modules/idm/onsite-config/idmClientConfig.json
+
+  "client_id": "2d938a37-0fe3-46c8-a619-e4cb8284ab4d",
+  "client_secret" : "QNNZIDTQ3ROT_CyXkaLbgQI9wV-d17G6WTZeL86T7sGrWCC8fseaRAkXp3Yzx3vmX3_H0WmPBCYiR1z-YzLCRA",
+  "redirect_uri": "http://localhost:8080/idmcallback",
+  "authorization_scope": "openid profile eduorg edustudent",
+  "id_token_signed_response_alg" : "none"
+
+5. Client Side:
+
+//clone https://github.com/eran-correlor/react-idm into APP/src/modules/react-idm
+
+6. Sample Users on IDM:
+
+Sug,    Zehut,      Code,    PW,       Mosad,  Kita
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Talmid, 0331219212, 4012077, 4324,     379842, Gimel/1
+Talmid, 0328398730, 3973173, 4325,     379842, Hei/1
+Talmid, 0215917436, 2896927, 2426,     318543, Z/1
+Mora,   0041949835, 1231552, 1qaZ2wsX, 379842, Gimel/1, Dalet/1
+Mora,   0201240058, 1366854, 1qaZ2wsX, 379842, Vav/1
+
+
+
+*/

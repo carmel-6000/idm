@@ -1,0 +1,7 @@
+1. Make sure you have APP_DOMAIN in server/config.json 
+2. add to your CustomUser:
+      `zehut` varchar(255) DEFAULT NULL,
+  `student_class` int(5) unsigned DEFAULT NULL,
+  `student_class_index` int(5) unsigned DEFAULT NULL,
+  `school` varchar(255) DEFAULT NULL,
+3. 
