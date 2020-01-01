@@ -24,30 +24,30 @@ module.exports.getUserId = function(userInfo){
  * check if the user info that is provided is TEACHER
  * @param {*} userInfo 
  */
-module.exports.isTeacher = function (userInfo) {
-    let orgRoleObject = this.searchFieldInUserinfo(userInfo, fields.ORG_ROLE_COMPLEX_FIELD);
+// module.exports.isTeacher = function (userInfo) {
+//     let orgRoleObject = this.searchFieldInUserinfo(userInfo, fields.ORG_ROLE_COMPLEX_FIELD);
 
-    if (!orgRoleObject) {
-        return false;
-    }
-    //check if the role is array
-    if (orgRoleObject.__proto__ == Array.prototype) {
-        for (curRole of orgRoleObject) {
-            // check if we found the role number for edu worker
-            if (curRole.search(EDU_WORKER_ROLE_REGEX) >= 0) {
-                return true;
-            }
-        }
+//     if (!orgRoleObject) {
+//         return false;
+//     }
+//     //check if the role is array
+//     if (orgRoleObject.__proto__ == Array.prototype) {
+//         for (curRole of orgRoleObject) {
+//             // check if we found the role number for edu worker
+//             if (curRole.search(EDU_WORKER_ROLE_REGEX) >= 0) {
+//                 return true;
+//             }
+//         }
 
-    }
-    else {
-        // check if we found the role number for edu worker
-        if (orgRoleObject.search(EDU_WORKER_ROLE_REGEX) >= 0) {
-            return true;
-        }
-    }
-    return false;
-}
+//     }
+//     else {
+//         // check if we found the role number for edu worker
+//         if (orgRoleObject.search(EDU_WORKER_ROLE_REGEX) >= 0) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 module.exports.searchFieldInUserinfo =  function searchFieldInUserinfo(userInfo,fieldToSearch){
     let fieldFound = null;
