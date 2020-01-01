@@ -1,10 +1,9 @@
 const idm = require('../idm');
 var logUser = require('debug')('model:user');
 const randomstring = require("randomstring");
-
+const rsaEncryption = require("../rsa-encryption");
 const PROD_ENV = "production";
 module.exports = app => {
-
 
     app.get('/idmcallback', async (req, res) => {
 
@@ -49,7 +48,7 @@ module.exports = app => {
 
             if (userInfo.orgrolecomplex && userInfo.orgrolecomplex.length > 1) {
                 let temp;
-                for (i = 0; i < userInfo.orgrolecomplex.length; i++) { // loop over all the data, to have all the schools the teacer is teaching.
+                for (let i = 0; i < userInfo.orgrolecomplex.length; i++) { // loop over all the data, to have all the schools the teacer is teaching.
                     temp = userInfo.orgrolecomplex[i];
                     if (temp.includes('mosad')) {
                         mosadsList.push(temp.substr(temp.indexOf('[')).match(/\d/g).join(''))//extract mosad number
@@ -59,11 +58,13 @@ module.exports = app => {
             }
             logUser("mosads list!! for teachers only:", mosadsList)
 
+            const tz = rsaEncryption.encryptBase64(zehutFunctions.normalizeIdNum(userInfo.zehut));
+
             let userInfoForDb = {
                 email: userInfo.sub + "@carmel.fake.com",
                 realm: userInfo.name,
                 username: userInfo.nickname,
-                zehut: userInfo.zehut,
+                zehut: tz,
                 studentClass: userInfo.studentkita,
                 studentClassIndex: userInfo.studentmakbila,
                 school: userInfo.studentmosad,
@@ -77,10 +78,11 @@ module.exports = app => {
             }
 
             let userRole = userInfo.isstudent === "Yes" ? 4 : 3; //student or teacher //TODO- get roles?
-            //TODO- hash this zehut. 
+
             app.models.CustomUser.registerOrLoginByUniqueField('zehut', userInfoForDb, userRole, (err, at) => {
 
                 if (err) {
+                    console.log("ERR", err)
                     res.redirect("/");
                     return;
                 }
@@ -95,7 +97,7 @@ module.exports = app => {
                 res.cookie('olk', randomstring.generate(), { signed: true, maxAge: 1000 * 60 * 60 * 5 });
 
                 let appDomain = app.get('APP_DOMAIN');
-                return res.redirect(process.env.NODE_ENV == PROD_ENV ? appDomain : "http://localhost:3000/home") //TODO make it creatush and not localhost
+                return res.redirect(process.env.NODE_ENV == PROD_ENV ? appDomain : "http://localhost:3000/home");
             }, null,
                 ['studentClass', 'studentClassIndex', 'school']);
 
@@ -105,4 +107,34 @@ module.exports = app => {
 
     });
 
+}
+const zehutFunctions = {
+    normalizeIdNum(id, skipControlDigitCheck = false) {
+        // Casting the ID to String (it might come numeric), and padding with zeroes in order to have 9 chars ID
+        id = String(id).padStart(9, '0');
+        if (skipControlDigitCheck || this.legalTz(id)) {
+            return id;
+        } else {
+            throw { errorCode: 'ID_LAST_DIGIT_NOT_VALID' };
+        }
+    },
+
+    legalTz(num) {
+        var tot = 0;
+        var tz = String(num);
+        for (let i = 0; i < 8; i++) {
+            let x = (((i % 2) + 1) * tz.charAt(i));
+            if (x > 9) {
+                x = x.toString();
+                x = parseInt(x.charAt(0)) + parseInt(x.charAt(1));
+            }
+            tot += x;
+        }
+
+        if ((tot + parseInt(tz.charAt(8))) % 10 === 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
