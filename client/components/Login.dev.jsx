@@ -1,22 +1,40 @@
-import React, { Component } from 'react';
+import React from 'react';
 // import './_Login.scss';
 import { Redirect } from 'react-router';
 import { Dialog, DialogTitle, Button, DialogContent, DialogActions } from '@material-ui/core';
 import Login from '../../../auth/Login';
 import eduImg from '../imgs/edu.png';
 
-const IDM_URL = 'https://is.remote.education.gov.il/nidp/oauth/nam/authz?client_id=2d938a37-0fe3-46c8-a619-e4cb8284ab4d&scope=openid%20profile%20eduorg%20edustudent&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fidmcallback';
+const IDM_URL = 'https://is.remote.education.gov.il/nidp/oauth/nam/authz?client_id=2d938a37-0fe3-46c8-a619-e4cb8284ab4d&scope=openid%20profile%20eduorg%20edustudent&response_type=code&reut_data=hihi&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fidmcallback';
 
 
 class LoginIdm extends Login {
 
     constructor(props) {
         super(props);
-
+        let loc = window.location.origin + (window.location.hash[0] === "#" ? `/#/${this.props.redirTo || 'samples'}` : `/${this.props.redirTo || 'samples'}`);
+        this.origin = this.serialize({ state: loc });
     }
+    serialize = (obj, prefix) => {
+        var str = [];
+
+        var p;
+        for (p in obj) {
+            if (obj.hasOwnProperty(p)) {
+                var k = prefix ? prefix + '[' + p + ']' : p;
+
+                var v = obj[p];
+                str.push((v !== null && typeof v === 'object')
+                    ? this.serialize(v, k)
+                    : encodeURIComponent(k) + '=' + encodeURIComponent(v));
+            }
+        }
+        return str.join('&');
+    };
 
     handleIDMLogin = () => {
-        window.location.href = IDM_URL;
+
+        window.location.href = IDM_URL + "&" + this.origin;
     }
 
     render() {

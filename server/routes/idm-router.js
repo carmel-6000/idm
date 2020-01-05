@@ -2,14 +2,15 @@ const idm = require('../idm');
 var logUser = require('debug')('model:user');
 const randomstring = require("randomstring");
 const rsaEncryption = require("../rsa-encryption");
-const PROD_ENV = "production";
+
+const IDM_ROLES = { STUDENT: 'student', TEACHER: 'teacher', none: 'SIMPLEUSER' };
 module.exports = app => {
 
     app.get('/idmcallback', async (req, res) => {
 
         if (!req.query.code) {
             console.log("Missing query arg code");
-            //next();
+            res.redirect('/');
         }
 
         try {
@@ -19,9 +20,10 @@ module.exports = app => {
             logUser("redirectedUrl?", redirectedUrl);
             let userInfo = await idm.fetchUserInfo(redirectedUrl);
 
+            let redirectUrl = req.query.state ? req.query.state : "https://www.hilma.tech/";
             //Incoming data looks that way:
             //STUDENT:
-            // let userInfo = {
+            //{
             //   sub: '908febb59047954940b5908febb59047',
             //   isstudent: 'Yes',
             //   studentmakbila: '1',
@@ -35,30 +37,22 @@ module.exports = app => {
             // };
 
             //TEACHER
-            // let x={ sub: 'cc1711c723783e4f1482cc1711c72378',
+            //{ sub: 'cc1711c723783e4f1482cc1711c72378',
             // isstudent: 'No',
             // nickname: '0011463437',
             // name: 'יפית סמני',
             // zehut: '011463437',
             // given_name: 'יפית',
             // family_name: 'סמני',
-            // orgrolecomplex: [ '667[Maarechet_hinuch:99999999]', '667[mosad:310300]' ] } +675ms
+            // orgrolecomplex: [ '667[Maarechet_hinuch:99999999]', '667[mosad:310300]' ] } 
 
-            let mosadsList = [];
 
             if (userInfo.orgrolecomplex && userInfo.orgrolecomplex.length > 1) {
-                let temp;
-                for (let i = 0; i < userInfo.orgrolecomplex.length; i++) { // loop over all the data, to have all the schools the teacer is teaching.
-                    temp = userInfo.orgrolecomplex[i];
-                    if (temp.includes('mosad')) {
-                        mosadsList.push(temp.substr(temp.indexOf('[')).match(/\d/g).join(''))//extract mosad number
-                    }
-                }
-                userInfo.studentmosad = JSON.stringify(mosadsList);
+                userInfo.studentmosad = IdmDataFunctions.getTeacherSchoolsString(userInfo.orgrolecomplex);
+                logUser("mosads list!! for teachers only:", userInfo.studentmosad)
             }
-            logUser("mosads list!! for teachers only:", mosadsList)
 
-            const tz = rsaEncryption.encryptBase64(zehutFunctions.normalizeIdNum(userInfo.zehut));
+            const tz = rsaEncryption.encryptBase64(IdmDataFunctions.normalizeIdNum(userInfo.zehut));
 
             let userInfoForDb = {
                 email: userInfo.sub + "@carmel.fake.com",
@@ -77,7 +71,20 @@ module.exports = app => {
                 return res.redirect("/");
             }
 
-            let userRole = userInfo.isstudent === "Yes" ? 4 : 3; //student or teacher //TODO- get roles?
+
+            let rolesToFind = [IDM_ROLES.none, userInfo.isstudent === "Yes" ? IDM_ROLES.STUDENT : IDM_ROLES.TEACHER];
+            let userRole, relevantRoles = await app.models.Role.find({ where: { name: { inq: rolesToFind } } }); //we dont use here findOne because it might give us the simpleuser instead of other role.
+            logUser("try find roles: ", relevantRoles);
+            if (relevantRoles.length === 1) userRole = relevantRoles[0].id;
+            else if (relevantRoles.length) {
+                userRole = relevantRoles.find(item => item.name.toLowerCase() === rolesToFind[1].toLowerCase()).id;
+            }
+            else {
+                console.log("\nYOU MUST HAVE THESE ROLES FOR IDM, DUDE: TEACHER,STUDENT, or at least SIMPLEUSER.\n");
+                return res.redirect("/");
+            }
+
+            logUser("role we try:", userRole);
 
             app.models.CustomUser.registerOrLoginByUniqueField('zehut', userInfoForDb, userRole, (err, at) => {
 
@@ -96,8 +103,7 @@ module.exports = app => {
                 res.cookie('klk', randomstring.generate(), { signed: true, maxAge: 1000 * 60 * 60 * 5 });
                 res.cookie('olk', randomstring.generate(), { signed: true, maxAge: 1000 * 60 * 60 * 5 });
 
-                let appDomain = app.get('APP_DOMAIN');
-                return res.redirect(process.env.NODE_ENV == PROD_ENV ? appDomain : "http://localhost:3000/home");
+                return res.redirect(redirectUrl);
             }, null,
                 ['studentClass', 'studentClassIndex', 'school']);
 
@@ -108,7 +114,7 @@ module.exports = app => {
     });
 
 }
-const zehutFunctions = {
+const IdmDataFunctions = {
     normalizeIdNum(id, skipControlDigitCheck = false) {
         // Casting the ID to String (it might come numeric), and padding with zeroes in order to have 9 chars ID
         id = String(id).padStart(9, '0');
@@ -136,5 +142,19 @@ const zehutFunctions = {
         } else {
             return false;
         }
+    },
+    getTeacherSchoolsString(orgrolecomplex) {
+        /** @param {Array} orgrolecomplex  */
+        let temp, mosadsList = [];
+        if (Array.isArray(orgrolecomplex))
+            for (let i = 0; i < orgrolecomplex.length; i++) { // loop over all the data, to have all the schools the teacer is teaching.
+                temp = orgrolecomplex[i];
+                if (temp.includes('mosad')) {
+                    mosadsList.push(temp.substr(temp.indexOf('[')).match(/\d/g).join(''))//extract mosad number
+                }
+            }
+        else mosadsList = [];
+        return JSON.stringify(mosadsList);
     }
+
 }

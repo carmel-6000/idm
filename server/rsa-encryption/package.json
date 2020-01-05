@@ -1,0 +1,15 @@
+{
+  "name": "rsa-encryption",
+  "version": "2.1.0",
+  "description": "rsa encryption package",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Edstart",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "app-root-path": "^2.1.0",
+    "node-rsa": "^1.0.1"
+  }
+}

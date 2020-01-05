@@ -1,9 +1,86 @@
-1. Make sure you have APP_DOMAIN in server/config.json 
+5/1/2020
+
+1. make sure to have to most up-to-date version of Auth. make sure that you have the 'afterRemote(registerOrLoginByUniqueField)'.
+
+
 2. add to your CustomUser:
       `zehut` varchar(255) DEFAULT NULL,
   `student_class` int(5) unsigned DEFAULT NULL,
   `student_class_index` int(5) unsigned DEFAULT NULL,
   `school` varchar(255) DEFAULT NULL,
+
+
+  and this to CustomUser.json
+
+   "zehut": {
+      "type": "String",
+      "required": false,
+      "length": null,
+      "precision": 10,
+      "scale": 0,
+      "mysql": {
+        "columnName": "zehut",
+        "dataType": "varchar",
+        "dataLength": 512,
+        "dataPrecision": 10,
+        "dataScale": 0,
+        "nullable": "Y"
+      }
+    },
+    "studentClass": {
+      "type": "Number",
+      "required": false,
+      "length": null,
+      "precision": 10,
+      "scale": 0,
+      "mysql": {
+        "columnName": "student_class",
+        "dataType": "int",
+        "dataLength": null,
+        "dataPrecision": 10,
+        "dataScale": 0,
+        "nullable": "Y"
+      }
+    },
+    "studentClassIndex": {
+      "type": "Number",
+      "required": false,
+      "length": null,
+      "precision": 10,
+      "scale": 0,
+      "mysql": {
+        "columnName": "student_class_index",
+        "dataType": "int",
+        "dataLength": null,
+        "dataPrecision": 10,
+        "dataScale": 0,
+        "nullable": "Y"
+      }
+    },
+    "school": {
+      "type": "String",
+      "required": false,
+      "length": 65535,
+      "precision": null,
+      "scale": null,
+      "mysql": {
+        "columnName": "school",
+        "dataType": "text",
+        "dataLength": 65535,
+        "dataPrecision": null,
+        "dataScale": null,
+        "nullable": "Y"
+      }
+    }
+  
+
+
+
+
+
+
+
+
 3. add to model-config in module-loader section:
     {
         "name": "idm",
@@ -20,8 +97,6 @@
     "node-rsa": "^1.0.7",
     "p-any": "^2.1.0",
     "oidc-token-hash": "^5.0.0",
-
-
 
 
 
