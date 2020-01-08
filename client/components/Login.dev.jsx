@@ -12,7 +12,7 @@ class LoginIdm extends Login {
 
     constructor(props) {
         super(props);
-        let loc = window.location.origin + (window.location.hash[0] === "#" ? `/#/${this.props.redirTo || 'samples'}` : `/${this.props.redirTo || 'samples'}`);
+        let loc = window.location.origin + (window.location.hash[0] === "#" ? `/#${this.props.redirectUrl || '/samples'}` : `${this.props.redirectUrl || '/samples'}`);
         this.origin = this.serialize({ state: loc });
     }
     serialize = (obj, prefix) => {
