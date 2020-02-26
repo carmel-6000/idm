@@ -6,9 +6,7 @@
 
 2. add to your CustomUser table:
 ```
-  `zehut` varchar(255) DEFAULT NULL,
-  `student_class` int(5) unsigned DEFAULT NULL,
-  `student_class_index` int(5) unsigned DEFAULT NULL,
+  `zehut` varchar(512) DEFAULT NULL,
   `school` varchar(255) DEFAULT NULL,
 ```
 
@@ -24,36 +22,6 @@
         "columnName": "zehut",
         "dataType": "varchar",
         "dataLength": 512,
-        "dataPrecision": 10,
-        "dataScale": 0,
-        "nullable": "Y"
-      }
-    },
-    "studentClass": {
-      "type": "Number",
-      "required": false,
-      "length": null,
-      "precision": 10,
-      "scale": 0,
-      "mysql": {
-        "columnName": "student_class",
-        "dataType": "int",
-        "dataLength": null,
-        "dataPrecision": 10,
-        "dataScale": 0,
-        "nullable": "Y"
-      }
-    },
-    "studentClassIndex": {
-      "type": "Number",
-      "required": false,
-      "length": null,
-      "precision": 10,
-      "scale": 0,
-      "mysql": {
-        "columnName": "student_class_index",
-        "dataType": "int",
-        "dataLength": null,
         "dataPrecision": 10,
         "dataScale": 0,
         "nullable": "Y"
@@ -78,13 +46,29 @@
 ```
 
 
+**Optional fields:**
+these fields are not required for this module, and you can choose to add them. dont dorget to add also to ```CustomUser.json```.
+
+```
+ `student_class` int(5) unsigned DEFAULT NULL,
+  `student_class_index` int(5) unsigned DEFAULT NULL,
+  `first_name` varchar(50) default NULL,
+  `last_name` varchar(50) default NULL
+
+  ```
+**You can also rename there fields**. For example, if you want rename *school* to *schoolCode*, you can use the config and set 
+```{"saveAs":"schoolCode"}```
+
+
+
 3. add to ***model-config*** in module-loader section:
 ```
     {
         "name": "idm",
         "path": "../src/modules/idm",
         "routes": "server/routes",
-        "github": "https://github.com/carmel-6000/idm.git"
+        "github": "https://github.com/carmel-6000/idm.git",
+        "enabled":true
       }
 ```
 
@@ -110,3 +94,16 @@
       node create-public-key.js
       mv publicKey.txt encryption/ 
 ```
+
+
+7. run : ```npm run generate-config``` to set all configs. fill in your preferences in *server/config.json* and in *server/config.production.json*
+**NOTICE**: if enabled is false, it will not save this field for you!
+
+``` 
+"firstName": {
+          "enabled": false,
+          "saveAs": "firstName"
+        },
+```
+
+you can change the saveAs to your own column-name.

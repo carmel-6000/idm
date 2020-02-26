@@ -1,0 +1,24 @@
+{
+    "fields": {
+        "firstName": {
+            "enabled": false,
+            "saveAs": "firstName"
+        },
+        "lastName": {
+            "enabled": false,
+            "saveAs": "lastName"
+        },
+        "studentClass": {
+            "enabled": false,
+            "saveAs": "studentClass"
+        },
+        "studentClassIndex": {
+            "enabled": false,
+            "saveAs": "studentClassIndex"
+        },
+        "school": {
+            "enabled": true,
+            "saveAs": "scholl"
+        }
+    }
+}

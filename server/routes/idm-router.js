@@ -1,3 +1,4 @@
+require('dotenv').config()
 const idm = require('../idm');
 var logUser = require('debug')('model:user');
 const randomstring = require("randomstring");
@@ -5,6 +6,7 @@ const rsaEncryption = require("../rsa-encryption");
 
 const IDM_ROLES = { STUDENT: 'student', TEACHER: 'teacher', none: 'SIMPLEUSER' };
 module.exports = app => {
+    const customConfig = app.get('modules').idm;
 
     app.get('/idmcallback', async (req, res) => {
 
@@ -20,7 +22,7 @@ module.exports = app => {
             logUser("redirectedUrl?", redirectedUrl);
             let userInfo = await idm.fetchUserInfo(redirectedUrl);
 
-            let redirectUrl = req.query.state ? req.query.state : "https://www.hilma.tech/";
+            let redirectUrl = req.query.state ? req.query.state : process.env.REACT_APP_DOMAIN ? process.env.REACT_APP_DOMAIN : "https://www.hilma.tech/";
             //Incoming data looks that way:
             //STUDENT:
             //{
@@ -62,7 +64,19 @@ module.exports = app => {
                 studentClass: userInfo.studentkita,
                 studentClassIndex: userInfo.studentmakbila,
                 school: userInfo.studentmosad,
+                firstName: userInfo.given_name,
+                lastName: userInfo.family_name
             };
+            for (key in customConfig.fields) {
+                if (customConfig.fields[key].enabled) {
+                    if (key !== customConfig.fields[key].saveAs) {
+                        userInfoForDb[customConfig.fields[key].saveAs] = userInfoForDb[key];
+                        delete userInfoForDb[key];
+                    }
+                }
+                else
+                    delete userInfoForDb[key];
+            }
 
             logUser("userInfo?!", userInfo, "\n");
             if (!userInfo) {
