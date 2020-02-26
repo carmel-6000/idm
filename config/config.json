@@ -18,7 +18,7 @@
         },
         "school": {
             "enabled": true,
-            "saveAs": "scholl"
+            "saveAs": "school"
         }
     }
 }
