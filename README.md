@@ -118,7 +118,9 @@ window.location.href = 'https://is.remote.education.gov.il/nidp/jsp/logoutSucces
 ### Options before login/registration:
 add to server > config.json
 
-to allow registration only for students with school + not for teachers:
+"student": allow/block registration for students (true - allow , false - block)
+"teacher": allow/block registration for teachers (true - allow , false - block)
+"hasNoSchool": allow/block registration for students without school code (true - allow , false - block)
 
 ``` json
  "allowRegistration": {
