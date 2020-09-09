@@ -114,3 +114,28 @@ you can change the saveAs to your own column-name.
 window.location.href = 'https://is.remote.education.gov.il/nidp/jsp/logoutSuccess.jsp'
 ```
 
+
+### Options before login/registration:
+add to server > config.json
+
+to allow registration only for students with school + not for teachers:
+
+``` json
+ "allowRegistration": {
+    "student": true,
+    "teacher": false,
+    "hasNoSchool": false
+  }
+```
+to allow registration for *students* only if their mosad code exists in your table specify-
+
+"table": the table containing the schools
+"column": the column containing the mosad code
+
+``` json
+
+  "registerOnlyIfSchoolExists": {
+    "table": "schools",
+    "column": "mosad"
+  }
+```
