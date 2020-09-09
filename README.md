@@ -107,3 +107,10 @@ these fields are not required for this module, and you can choose to add them. d
 ```
 
 you can change the saveAs to your own column-name.
+
+
+### To log out:
+``` js
+window.location.href = 'https://is.remote.education.gov.il/nidp/jsp/logoutSuccess.jsp'
+```
+

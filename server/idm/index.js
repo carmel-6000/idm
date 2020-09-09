@@ -1,5 +1,5 @@
 const appRoot = require('app-root-path');
-const {Issuer} = require('./modules/openid-client');
+const { Issuer } = require('./modules/openid-client');
 const idmIdpConfig = require('./onsite-config/idmIdpConfig.json');
 const idmClientConfig = require('./onsite-config/idmClientConfig.json');
 const url = require('url');
@@ -21,6 +21,16 @@ client = new idmIssuer.Client({
   token_endpoint_auth_method: idmClientConfig.token_endpoint_auth_method,
   id_token_signed_response_alg: idmClientConfig.id_token_signed_response_alg
 }); // => Client
+
+// module.exports.logOut = async function () {
+//   console.log('so how do i logout?')
+//   client.endSessionUrl({
+//     state: 'yay'
+//     // post_logout_redirect_uri: '...', // OPTIONAL, defaults to client.post_logout_redirect_uris[0] if there's only one
+//     // state: '...', // RECOMMENDED
+//     // id_token_hint: '...', // OPTIONAL, accepts the string value or tokenSet with id_token
+//   });
+// }
 
 client['CLOCK_TOLERANCE'] = idmIdpConfig.CLOCK_TOLERANCE;
 
@@ -65,7 +75,7 @@ module.exports.fetchUserInfo = async function (redirectedUrl, explicitRedirectUr
     // If the logic was made via a deep link, the URL might contain a 'state parameter,
     // carried over from the previous phase of the login (i.e. when we were getting the code).
     // The state parameter must be cleared from the URL's parameters, otherwise we'll get an error from IDM.
-    redirectedUrl =  removeParameterFromUrl(redirectedUrl, 'state');
+    redirectedUrl = removeParameterFromUrl(redirectedUrl, 'state');
     let token = await this.processCodeCallBack(redirectedUrl, explicitRedirectUri);
     if (token) {
       userInfo = await client.userinfo(token.access_token);

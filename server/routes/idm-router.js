@@ -1,14 +1,23 @@
 require('dotenv').config()
 const idm = require('../idm');
+// const idm = require('../')
 var logUser = require('debug')('model:user');
 const randomstring = require("randomstring");
 const rsaEncryption = require("../rsa-encryption");
 
 const IDM_ROLES = { STUDENT: 'student', TEACHER: 'teacher', none: 'SIMPLEUSER' };
-module.exports = app => {
+module.exports = (app, projectCallbackFunc) => {
+
+    //tood :
+    // PUTCALLBACK not realy
+    //write callback func and test it
+    //take care of "isstuent " =no without orgocomplex 
+    //set USERNAME to null instead of zehut
     const customConfig = app.get('modules').idm;
 
     app.get('/idmcallback', async (req, res) => {
+
+
 
         if (!req.query.code) {
             console.log("Missing query arg code");
@@ -21,7 +30,6 @@ module.exports = app => {
             let redirectedUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
             logUser("redirectedUrl?", redirectedUrl);
             let userInfo = await idm.fetchUserInfo(redirectedUrl);
-
             let redirectUrl = req.query.state ? req.query.state : process.env.REACT_APP_DOMAIN ? process.env.REACT_APP_DOMAIN : "https://www.hilma.tech/";
             //Incoming data looks that way:
             //STUDENT:
@@ -48,6 +56,15 @@ module.exports = app => {
             // family_name: 'סמני',
             // orgrolecomplex: [ '667[Maarechet_hinuch:99999999]', '667[mosad:310300]' ] } 
 
+            console.log(userInfo)
+
+            if (customConfig.allowRegistration && !customConfig.allowRegistration.teacher && userInfo.orgrolecomplex) {
+                return res.redirect(`https://is.remote.education.gov.il/nidp/jsp/logoutSuccess.jsp?logoutURL=${redirectUrl}`)
+            }
+
+            if (customConfig.allowRegistration && !customConfig.allowRegistration.student && userInfo.isstudent === 'Yes') {
+                return res.redirect(`https://is.remote.education.gov.il/nidp/jsp/logoutSuccess.jsp?logoutURL=${redirectUrl}`)
+            }
 
             if (userInfo.orgrolecomplex && userInfo.orgrolecomplex.length > 1) {
                 userInfo.studentmosad = IdmDataFunctions.getTeacherSchoolsString(userInfo.orgrolecomplex);
@@ -59,7 +76,7 @@ module.exports = app => {
             let userInfoForDb = {
                 email: userInfo.sub + "@carmel.fake.com",
                 realm: userInfo.name,
-                username: userInfo.nickname,
+                username: null,
                 zehut: tz,
                 studentClass: userInfo.studentkita,
                 studentClassIndex: userInfo.studentmakbila,
@@ -78,6 +95,15 @@ module.exports = app => {
                     delete userInfoForDb[key];
             }
 
+            if (customConfig.registerOnlyIfSchoolExists && userInfoForDb.school && (userInfo.isstudent === "Yes" || !userInfo.orgrolecomplex)) {
+
+                let schoolErr, schoolRes = await app.models[customConfig.registerOnlyIfSchoolExists.table].findOne({ where: { [customConfig.registerOnlyIfSchoolExists.column]: userInfoForDb.school } })
+
+                if (!schoolRes) {
+                    return res.redirect(`https://is.remote.education.gov.il/nidp/jsp/logoutSuccess.jsp?logoutURL=${redirectUrl}`)
+                }
+            }
+
             logUser("userInfo?!", userInfo, "\n");
             if (!userInfo) {
                 //throw 'No data was fetched from IDM. Aborting login';
@@ -86,7 +112,9 @@ module.exports = app => {
             }
 
 
-            let rolesToFind = [IDM_ROLES.none, userInfo.isstudent === "Yes" ? IDM_ROLES.STUDENT : IDM_ROLES.TEACHER];
+            let rolesToFind = [IDM_ROLES.none,
+            userInfo.isstudent === "Yes" || !userInfo.orgrolecomplex ? IDM_ROLES.STUDENT :
+                IDM_ROLES.TEACHER];
             let userRole, relevantRoles = await app.models.Role.find({ where: { name: { inq: rolesToFind } } }); //we dont use here findOne because it might give us the simpleuser instead of other role.
             logUser("try find roles: ", relevantRoles);
             if (relevantRoles.length === 1) userRole = relevantRoles[0].id;
@@ -96,6 +124,10 @@ module.exports = app => {
             else {
                 console.log("\nYOU MUST HAVE THESE ROLES FOR IDM, DUDE: TEACHER,STUDENT, or at least SIMPLEUSER.\n");
                 return res.redirect("/");
+            }
+
+            if (customConfig.allowRegistration && !customConfig.allowRegistration.hasNoSchool && (!userInfoForDb.school || (!JSON.parse(userInfoForDb.school).length) && userRole === 4)) {
+                return res.redirect(`https://is.remote.education.gov.il/nidp/jsp/logoutSuccess.jsp?logoutURL=${redirectUrl}`)
             }
 
             logUser("role we try:", userRole);
@@ -116,6 +148,10 @@ module.exports = app => {
                 res.cookie('kloo', randomstring.generate(), { signed: true, maxAge: 1000 * 60 * 60 * 5 });
                 res.cookie('klk', randomstring.generate(), { signed: true, maxAge: 1000 * 60 * 60 * 5 });
                 res.cookie('olk', randomstring.generate(), { signed: true, maxAge: 1000 * 60 * 60 * 5 });
+
+                if (projectCallbackFunc && typeof projectCallbackFunc === 'function') {
+                    projectCallbackFunc(userInfoForDb, userInfo, userRole, at)
+                }
 
                 return res.redirect(redirectUrl);
             }, null,
